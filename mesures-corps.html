@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesures corporelles</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f4f0;
+      --text: #1a1a18;
+      --text-secondary: #6b6a65;
+      --border: rgba(0,0,0,0.15);
+      --border-hover: rgba(0,0,0,0.3);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --success-bg: #eaf3de;
+      --success-text: #3b6d11;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1c;
+        --bg-secondary: #2a2a28;
+        --text: #f0ede8;
+        --text-secondary: #9b9990;
+        --border: rgba(255,255,255,0.15);
+        --border-hover: rgba(255,255,255,0.3);
+        --success-bg: #173404;
+        --success-text: #c0dd97;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: var(--bg);
+      border-radius: var(--radius-lg);
+      border: 0.5px solid var(--border);
+      padding: 2rem;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .card-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header h1 {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .wrap {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .left { flex: 0 0 240px; }
+
+    svg#silhouette { width: 240px; height: 390px; display: block; }
+
+    .right { flex: 1; min-width: 240px; }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      margin-top: 18px;
+      padding-bottom: 6px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .section-title:first-child { margin-top: 0; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    label {
+      font-size: 14px;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .input-unit {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    input[type=number] {
+      width: 72px;
+      padding: 6px 8px;
+      font-size: 14px;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      color: var(--text);
+      appearance: none;
+      -moz-appearance: textfield;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    input[type=number]:focus {
+      outline: none;
+      border-color: var(--border-hover);
+      box-shadow: 0 0 0 2px rgba(127,119,221,0.15);
+    }
+
+    .unit {
+      font-size: 12px;
+      color: var(--text-secondary);
+      min-width: 20px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { background: var(--bg-secondary); }
+    .btn:active { transform: scale(0.98); }
+    .btn.primary { background: #534AB7; border-color: #534AB7; color: #fff; }
+    .btn.primary:hover { background: #3C3489; }
+
+    .toast {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .historique {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .historique h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .hist-table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+    }
+
+    .hist-table th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      padding: 4px 8px 8px 0;
+    }
+
+    .hist-table td {
+      padding: 6px 8px 6px 0;
+      border-top: 0.5px solid var(--border);
+      color: var(--text);
+    }
+
+    .empty {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 12px 0;
+    }
+
+    @media (max-width: 540px) {
+      .left { flex: 0 0 100%; display: flex; justify-content: center; }
+      .right { flex: 0 0 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <h1>Mesures corporelles</h1>
+      <p>Saisis tes mensurations et suis ta progression dans le temps.</p>
+    </div>
+
+    <div class="wrap">
+      <div class="left">
+        <svg id="silhouette" viewBox="0 0 260 420" xmlns="http://www.w3.org/2000/svg">
+          <!-- Tête -->
+          <ellipse cx="130" cy="42" rx="26" ry="30" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Cou -->
+          <rect x="119" y="68" width="22" height="16" rx="4" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Torse -->
+          <path d="M85,84 Q68,90 65,120 Q63,148 70,175 L190,175 Q197,148 195,120 Q192,90 175,84 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Épaules -->
+          <ellipse cx="67" cy="96" rx="18" ry="12" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <ellipse cx="193" cy="96" rx="18" ry="12" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Bras gauche -->
+          <path d="M52,104 Q40,118 38,140 Q36,158 40,175 L56,175 Q55,155 57,138 Q60,118 70,104 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M40,175 Q36,195 37,215 Q38,228 42,235 L58,235 Q57,228 56,215 Q55,195 56,175 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Bras droit -->
+          <path d="M208,104 Q220,118 222,140 Q224,158 220,175 L204,175 Q205,155 203,138 Q200,118 190,104 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M220,175 Q224,195 223,215 Q222,228 218,235 L202,235 Q203,228 204,215 Q205,195 204,175 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Bassin -->
+          <path d="M70,175 Q62,195 65,215 L195,215 Q198,195 190,175 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Cuisses -->
+          <path d="M65,215 Q58,240 60,268 Q62,285 66,295 L96,295 Q96,285 98,268 Q100,240 100,215 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M195,215 Q202,240 200,268 Q198,285 194,295 L164,295 Q164,285 162,268 Q160,240 160,215 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Jambes -->
+          <path d="M66,295 Q63,315 64,338 Q65,352 68,360 L94,360 Q94,352 96,338 Q97,315 96,295 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M194,295 Q197,315 196,338 Q195,352 192,360 L166,360 Q166,352 164,338 Q163,315 164,295 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Pieds -->
+          <ellipse cx="81" cy="366" rx="16" ry="8" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <ellipse cx="179" cy="366" rx="16" ry="8" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Annotations -->
+          <line x1="50" y1="88" x2="36" y2="88" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="33" y="84" font-size="10" fill="#7F77DD" text-anchor="end" font-family="sans-serif">épaules</text>
+          <line x1="130" y1="110" x2="20" y2="110" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="16" y="106" font-size="10" fill="#1D9E75" text-anchor="end" font-family="sans-serif">poitrine</text>
+          <line x1="65" y1="155" x2="20" y2="155" stroke="#D85A30" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="16" y="151" font-size="10" fill="#D85A30" text-anchor="end" font-family="sans-serif">taille</text>
+          <line x1="66" y1="196" x2="20" y2="196" stroke="#D4537E" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="16" y="192" font-size="10" fill="#D4537E" text-anchor="end" font-family="sans-serif">hanches</text>
+          <line x1="210" y1="140" x2="240" y2="140" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="243" y="144" font-size="10" fill="#BA7517" text-anchor="start" font-family="sans-serif">biceps</text>
+          <line x1="195" y1="250" x2="240" y2="250" stroke="#378ADD" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="243" y="254" font-size="10" fill="#378ADD" text-anchor="start" font-family="sans-serif">cuisse</text>
+          <line x1="192" y1="325" x2="240" y2="325" stroke="#888780" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="243" y="329" font-size="10" fill="#888780" text-anchor="start" font-family="sans-serif">mollet</text>
+        </svg>
+      </div>
+
+      <div class="right">
+        <div class="section-title">Haut du corps</div>
+
+        <div class="row">
+          <div class="dot" style="background:#7F77DD"></div>
+          <label for="epaules">Épaules</label>
+          <div class="input-unit">
+            <input type="number" id="epaules" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#1D9E75"></div>
+          <label for="pecs">Tour de poitrine</label>
+          <div class="input-unit">
+            <input type="number" id="pecs" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#BA7517"></div>
+          <label for="biceps">Biceps</label>
+          <div class="input-unit">
+            <input type="number" id="biceps" min="0" max="100" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#D85A30"></div>
+          <label for="taille">Tour de taille</label>
+          <div class="input-unit">
+            <input type="number" id="taille" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+
+        <div class="section-title">Bas du corps</div>
+
+        <div class="row">
+          <div class="dot" style="background:#D4537E"></div>
+          <label for="hanches">Tour de hanches</label>
+          <div class="input-unit">
+            <input type="number" id="hanches" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#378ADD"></div>
+          <label for="cuisse">Tour de cuisse</label>
+          <div class="input-unit">
+            <input type="number" id="cuisse" min="0" max="150" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#888780"></div>
+          <label for="mollet">Tour de mollet</label>
+          <div class="input-unit">
+            <input type="number" id="mollet" min="0" max="100" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+
+        <div class="section-title">Général</div>
+
+        <div class="row">
+          <div class="dot" style="background:var(--border-hover)"></div>
+          <label for="hauteur">Taille (hauteur)</label>
+          <div class="input-unit">
+            <input type="number" id="hauteur" min="100" max="250" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:var(--border-hover)"></div>
+          <label for="poids">Poids</label>
+          <div class="input-unit">
+            <input type="number" id="poids" min="30" max="300" step="0.1" placeholder="—">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="sauvegarder()">
+            <i class="ti ti-device-floppy"></i> Enregistrer
+          </button>
+          <button class="btn" onclick="exporterCSV()">
+            <i class="ti ti-download"></i> Exporter CSV
+          </button>
+          <button class="btn" onclick="clearForm()">
+            <i class="ti ti-eraser"></i> Effacer
+          </button>
+        </div>
+        <div class="toast" id="toast"><i class="ti ti-check"></i> <span id="toast-msg">Mesures enregistrées !</span></div>
+      </div>
+    </div>
+
+    <!-- Historique -->
+    <div class="historique">
+      <h2>Historique</h2>
+      <div id="hist-content"></div>
+    </div>
+  </div>
+
+  <script>
+    const CHAMPS = [
+      { id: 'epaules', label: 'Épaules', unit: 'cm' },
+      { id: 'pecs', label: 'Poitrine', unit: 'cm' },
+      { id: 'biceps', label: 'Biceps', unit: 'cm' },
+      { id: 'taille', label: 'Taille', unit: 'cm' },
+      { id: 'hanches', label: 'Hanches', unit: 'cm' },
+      { id: 'cuisse', label: 'Cuisse', unit: 'cm' },
+      { id: 'mollet', label: 'Mollet', unit: 'cm' },
+      { id: 'hauteur', label: 'Hauteur', unit: 'cm' },
+      { id: 'poids', label: 'Poids', unit: 'kg' },
+    ];
+
+    function getHistorique() {
+      try { return JSON.parse(localStorage.getItem('mesures-historique') || '[]'); }
+      catch(e) { return []; }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.style.display = 'flex';
+      setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    function sauvegarder() {
+      const mesures = {};
+      CHAMPS.forEach(c => {
+        const v = document.getElementById(c.id).value;
+        if (v !== '') mesures[c.id] = parseFloat(v);
+      });
+      if (Object.keys(mesures).length === 0) {
+        alert('Saisis au moins une mesure avant d\'enregistrer.');
+        return;
+      }
+      const date = new Date().toLocaleDateString('fr-FR');
+      const hist = getHistorique();
+      hist.push({ date, ...mesures });
+      localStorage.setItem('mesures-historique', JSON.stringify(hist));
+      afficherHistorique();
+      showToast('Mesures enregistrées !');
+    }
+
+    function clearForm() {
+      CHAMPS.forEach(c => document.getElementById(c.id).value = '');
+    }
+
+    function exporterCSV() {
+      const hist = getHistorique();
+      if (hist.length === 0) { alert('Aucune donnée à exporter.'); return; }
+      const cols = ['date', ...CHAMPS.map(c => c.id)];
+      const header = ['Date', ...CHAMPS.map(c => c.label + ' (' + c.unit + ')')].join(';');
+      const rows = hist.map(e => cols.map(k => e[k] !== undefined ? e[k] : '').join(';'));
+      const csv = [header, ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mesures-corps.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function afficherHistorique() {
+      const hist = getHistorique();
+      const el = document.getElementById('hist-content');
+      if (hist.length === 0) {
+        el.innerHTML = '<p class="empty">Aucune mesure enregistrée pour l\'instant.</p>';
+        return;
+      }
+      const cols = CHAMPS.filter(c => hist.some(e => e[c.id] !== undefined));
+      let html = '<table class="hist-table"><thead><tr><th>Date</th>';
+      cols.forEach(c => html += `<th>${c.label}</th>`);
+      html += '</tr></thead><tbody>';
+      [...hist].reverse().forEach(e => {
+        html += `<tr><td>${e.date}</td>`;
+        cols.forEach(c => html += `<td>${e[c.id] !== undefined ? e[c.id] + ' ' + c.unit : '—'}</td>`);
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    }
+
+    afficherHistorique();
+  </script>
+</body>
+</html>
