@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesures corporelles</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f4f0;
+      --text: #1a1a18;
+      --text-secondary: #6b6a65;
+      --border: rgba(0,0,0,0.15);
+      --border-hover: rgba(0,0,0,0.3);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --success-bg: #eaf3de;
+      --success-text: #3b6d11;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1c;
+        --bg-secondary: #2a2a28;
+        --text: #f0ede8;
+        --text-secondary: #9b9990;
+        --border: rgba(255,255,255,0.15);
+        --border-hover: rgba(255,255,255,0.3);
+        --success-bg: #173404;
+        --success-text: #c0dd97;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: var(--bg);
+      border-radius: var(--radius-lg);
+      border: 0.5px solid var(--border);
+      padding: 2rem;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .card-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header h1 {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .wrap {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .left { flex: 0 0 300px; }
+
+    svg#silhouette { width: 300px; height: 420px; display: block; }
+
+    .right { flex: 1; min-width: 240px; }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      margin-top: 18px;
+      padding-bottom: 6px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .section-title:first-child { margin-top: 0; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    label {
+      font-size: 14px;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .input-unit {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    input[type=number] {
+      width: 72px;
+      padding: 6px 8px;
+      font-size: 14px;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      color: var(--text);
+      appearance: none;
+      -moz-appearance: textfield;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    input[type=number]:focus {
+      outline: none;
+      border-color: var(--border-hover);
+      box-shadow: 0 0 0 2px rgba(127,119,221,0.15);
+    }
+
+    .unit {
+      font-size: 12px;
+      color: var(--text-secondary);
+      min-width: 20px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { background: var(--bg-secondary); }
+    .btn:active { transform: scale(0.98); }
+    .btn.primary { background: #534AB7; border-color: #534AB7; color: #fff; }
+    .btn.primary:hover { background: #3C3489; }
+
+    .toast {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .historique {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .historique h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .hist-table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+    }
+
+    .hist-table th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      padding: 4px 8px 8px 0;
+    }
+
+    .hist-table td {
+      padding: 6px 8px 6px 0;
+      border-top: 0.5px solid var(--border);
+      color: var(--text);
+    }
+
+    .empty {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 12px 0;
+    }
+
+    @media (max-width: 540px) {
+      .left { flex: 0 0 100%; display: flex; justify-content: center; }
+      .right { flex: 0 0 100%; }
+    }
+
+    /* Carte de partage (hors écran pendant la génération) */
+    #share-card {
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 720px;
+      background: #ffffff;
+      padding: 40px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+
+    #share-card .sc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 2px solid #534AB7;
+    }
+
+    #share-card .sc-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a18;
+      letter-spacing: -0.3px;
+    }
+
+    #share-card .sc-date {
+      font-size: 13px;
+      color: #888780;
+      background: #f5f4f0;
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    #share-card .sc-body {
+      display: flex;
+      gap: 36px;
+      align-items: stretch;
+    }
+
+    #share-card .sc-left {
+      flex: 0 0 260px;
+      background: #f5f4f0;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 10px;
+    }
+
+    #share-card .sc-left img {
+      width: 240px;
+      height: auto;
+      display: block;
+    }
+
+    #share-card .sc-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+    }
+
+    #share-card .sc-section {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #b4b2a9;
+      margin: 14px 0 8px;
+    }
+
+    #share-card .sc-section:first-child { margin-top: 0; }
+
+    #share-card .sc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    #share-card .sc-item {
+      background: #f5f4f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      border-left: 3px solid #ccc;
+    }
+
+    #share-card .sc-item-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888780;
+      margin-bottom: 3px;
+    }
+
+    #share-card .sc-item-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a18;
+      line-height: 1;
+    }
+
+    #share-card .sc-item-value span {
+      font-size: 12px;
+      font-weight: 400;
+      color: #888780;
+    }
+
+    #share-card .sc-footer {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid #e8e6e0;
+      font-size: 11px;
+      color: #b4b2a9;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    .btn.share { border-color: #534AB7; color: #534AB7; }
+    .btn.share:hover { background: #EEEDFE; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <h1>Mesures corporelles</h1>
+      <p>Saisis tes mensurations et suis ta progression dans le temps.</p>
+    </div>
+
+    <div class="wrap">
+      <div class="left">
+        <svg id="silhouette" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
+          <!-- Corps centré à x=160 -->
+          <!-- Tête -->
+          <ellipse cx="160" cy="42" rx="26" ry="30" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Cou -->
+          <rect x="149" y="68" width="22" height="16" rx="4" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Torse -->
+          <path d="M115,84 Q98,90 95,120 Q93,148 100,175 L220,175 Q227,148 225,120 Q222,90 205,84 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Épaules -->
+          <ellipse cx="97" cy="96" rx="18" ry="12" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <ellipse cx="223" cy="96" rx="18" ry="12" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Bras gauche -->
+          <path d="M82,104 Q70,118 68,140 Q66,158 70,175 L86,175 Q85,155 87,138 Q90,118 100,104 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M70,175 Q66,195 67,215 Q68,228 72,235 L88,235 Q87,228 86,215 Q85,195 86,175 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Bras droit -->
+          <path d="M238,104 Q250,118 252,140 Q254,158 250,175 L234,175 Q235,155 233,138 Q230,118 220,104 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M250,175 Q254,195 253,215 Q252,228 248,235 L232,235 Q233,228 234,215 Q235,195 234,175 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Bassin -->
+          <path d="M100,175 Q92,195 95,215 L225,215 Q228,195 220,175 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Cuisses -->
+          <path d="M95,215 Q88,240 90,268 Q92,285 96,295 L126,295 Q126,285 128,268 Q130,240 130,215 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M225,215 Q232,240 230,268 Q228,285 224,295 L194,295 Q194,285 192,268 Q190,240 190,215 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Jambes -->
+          <path d="M96,295 Q93,315 94,338 Q95,352 98,360 L124,360 Q124,352 126,338 Q127,315 126,295 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <path d="M224,295 Q227,315 226,338 Q225,352 222,360 L196,360 Q196,352 194,338 Q193,315 194,295 Z" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <!-- Pieds -->
+          <ellipse cx="111" cy="366" rx="16" ry="8" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+          <ellipse cx="209" cy="366" rx="16" ry="8" fill="var(--bg-secondary)" stroke="var(--border-hover)" stroke-width="1.5"/>
+
+          <!-- Annotations GAUCHE (épaules, poitrine, taille, hanches) -->
+          <line x1="82" y1="90" x2="52" y2="90" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.85"/>
+          <text x="49" y="94" font-size="11" fill="#7F77DD" text-anchor="end" font-family="sans-serif">épaules</text>
+
+          <line x1="95" y1="112" x2="52" y2="112" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.85"/>
+          <text x="49" y="116" font-size="11" fill="#1D9E75" text-anchor="end" font-family="sans-serif">poitrine</text>
+
+          <line x1="95" y1="155" x2="52" y2="155" stroke="#D85A30" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.85"/>
+          <text x="49" y="159" font-size="11" fill="#D85A30" text-anchor="end" font-family="sans-serif">taille</text>
+
+          <line x1="96" y1="197" x2="52" y2="197" stroke="#D4537E" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.85"/>
+          <text x="49" y="201" font-size="11" fill="#D4537E" text-anchor="end" font-family="sans-serif">hanches</text>
+
+          <!-- Annotations DROITE (biceps, cuisse, mollet) -->
+          <line x1="240" y1="140" x2="268" y2="140" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.85"/>
+          <text x="271" y="144" font-size="11" fill="#BA7517" text-anchor="start" font-family="sans-serif">biceps</text>
+
+          <line x1="225" y1="252" x2="268" y2="252" stroke="#378ADD" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.85"/>
+          <text x="271" y="256" font-size="11" fill="#378ADD" text-anchor="start" font-family="sans-serif">cuisse</text>
+
+          <line x1="222" y1="328" x2="268" y2="328" stroke="#888780" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.85"/>
+          <text x="271" y="332" font-size="11" fill="#888780" text-anchor="start" font-family="sans-serif">mollet</text>
+        </svg>
+      </div>
+
+      <div class="right">
+        <div class="section-title">Haut du corps</div>
+
+        <div class="row">
+          <div class="dot" style="background:#7F77DD"></div>
+          <label for="epaules">Épaules</label>
+          <div class="input-unit">
+            <input type="number" id="epaules" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#1D9E75"></div>
+          <label for="pecs">Tour de poitrine</label>
+          <div class="input-unit">
+            <input type="number" id="pecs" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#BA7517"></div>
+          <label for="biceps">Biceps</label>
+          <div class="input-unit">
+            <input type="number" id="biceps" min="0" max="100" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#D85A30"></div>
+          <label for="taille">Tour de taille</label>
+          <div class="input-unit">
+            <input type="number" id="taille" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+
+        <div class="section-title">Bas du corps</div>
+
+        <div class="row">
+          <div class="dot" style="background:#D4537E"></div>
+          <label for="hanches">Tour de hanches</label>
+          <div class="input-unit">
+            <input type="number" id="hanches" min="0" max="200" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#378ADD"></div>
+          <label for="cuisse">Tour de cuisse</label>
+          <div class="input-unit">
+            <input type="number" id="cuisse" min="0" max="150" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:#888780"></div>
+          <label for="mollet">Tour de mollet</label>
+          <div class="input-unit">
+            <input type="number" id="mollet" min="0" max="100" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+
+        <div class="section-title">Général</div>
+
+        <div class="row">
+          <div class="dot" style="background:var(--border-hover)"></div>
+          <label for="hauteur">Taille (hauteur)</label>
+          <div class="input-unit">
+            <input type="number" id="hauteur" min="100" max="250" placeholder="—">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="dot" style="background:var(--border-hover)"></div>
+          <label for="poids">Poids</label>
+          <div class="input-unit">
+            <input type="number" id="poids" min="30" max="300" step="0.1" placeholder="—">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="sauvegarder()">
+            <i class="ti ti-device-floppy"></i> Enregistrer
+          </button>
+          <button class="btn" onclick="exporterCSV()">
+            <i class="ti ti-download"></i> Exporter CSV
+          </button>
+          <button class="btn share" onclick="genererScreenshot()">
+            <i class="ti ti-camera"></i> Partager
+          </button>
+          <button class="btn" onclick="clearForm()">
+            <i class="ti ti-eraser"></i> Effacer
+          </button>
+        </div>
+        <div class="toast" id="toast"><i class="ti ti-check"></i> <span id="toast-msg">Mesures enregistrées !</span></div>
+      </div>
+    </div>
+
+    <!-- Historique -->
+    <div class="historique">
+      <h2>Historique</h2>
+      <div id="hist-content"></div>
+    </div>
+  </div>
+
+  <script>
+    const CHAMPS = [
+      { id: 'epaules', label: 'Épaules', unit: 'cm' },
+      { id: 'pecs', label: 'Poitrine', unit: 'cm' },
+      { id: 'biceps', label: 'Biceps', unit: 'cm' },
+      { id: 'taille', label: 'Taille', unit: 'cm' },
+      { id: 'hanches', label: 'Hanches', unit: 'cm' },
+      { id: 'cuisse', label: 'Cuisse', unit: 'cm' },
+      { id: 'mollet', label: 'Mollet', unit: 'cm' },
+      { id: 'hauteur', label: 'Hauteur', unit: 'cm' },
+      { id: 'poids', label: 'Poids', unit: 'kg' },
+    ];
+
+    function getHistorique() {
+      try { return JSON.parse(localStorage.getItem('mesures-historique') || '[]'); }
+      catch(e) { return []; }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.style.display = 'flex';
+      setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    function sauvegarder() {
+      const mesures = {};
+      CHAMPS.forEach(c => {
+        const v = document.getElementById(c.id).value;
+        if (v !== '') mesures[c.id] = parseFloat(v);
+      });
+      if (Object.keys(mesures).length === 0) {
+        alert('Saisis au moins une mesure avant d\'enregistrer.');
+        return;
+      }
+      const date = new Date().toLocaleDateString('fr-FR');
+      const hist = getHistorique();
+      hist.push({ date, ...mesures });
+      localStorage.setItem('mesures-historique', JSON.stringify(hist));
+      afficherHistorique();
+      showToast('Mesures enregistrées !');
+    }
+
+    function clearForm() {
+      CHAMPS.forEach(c => document.getElementById(c.id).value = '');
+    }
+
+    function exporterCSV() {
+      const hist = getHistorique();
+      if (hist.length === 0) { alert('Aucune donnée à exporter.'); return; }
+      const cols = ['date', ...CHAMPS.map(c => c.id)];
+      const header = ['Date', ...CHAMPS.map(c => c.label + ' (' + c.unit + ')')].join(';');
+      const rows = hist.map(e => cols.map(k => e[k] !== undefined ? e[k] : '').join(';'));
+      const csv = [header, ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mesures-corps.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function afficherHistorique() {
+      const hist = getHistorique();
+      const el = document.getElementById('hist-content');
+      if (hist.length === 0) {
+        el.innerHTML = '<p class="empty">Aucune mesure enregistrée pour l\'instant.</p>';
+        return;
+      }
+      const cols = CHAMPS.filter(c => hist.some(e => e[c.id] !== undefined));
+      let html = '<table class="hist-table"><thead><tr><th>Date</th>';
+      cols.forEach(c => html += `<th>${c.label}</th>`);
+      html += '</tr></thead><tbody>';
+      [...hist].reverse().forEach(e => {
+        html += `<tr><td>${e.date}</td>`;
+        cols.forEach(c => html += `<td>${e[c.id] !== undefined ? e[c.id] + ' ' + c.unit : '—'}</td>`);
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    }
+
+    afficherHistorique();
+
+    function genererScreenshot() {
+      const mesures = {};
+      CHAMPS.forEach(c => {
+        const v = document.getElementById(c.id).value;
+        if (v !== '') mesures[c.id] = parseFloat(v);
+      });
+      if (Object.keys(mesures).length === 0) {
+        alert('Saisis au moins une mesure avant de partager.');
+        return;
+      }
+
+      const couleurs = {
+        epaules: '#7F77DD', pecs: '#1D9E75', biceps: '#BA7517',
+        taille: '#D85A30', hanches: '#D4537E', cuisse: '#378ADD',
+        mollet: '#888780', hauteur: '#534AB7', poids: '#534AB7'
+      };
+
+      const sections = [
+        { titre: 'Haut du corps', ids: ['epaules', 'pecs', 'biceps', 'taille'] },
+        { titre: 'Bas du corps',  ids: ['hanches', 'cuisse', 'mollet'] },
+        { titre: 'Général',       ids: ['hauteur', 'poids'] },
+      ];
+
+      const date = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      let rightHTML = '';
+      sections.forEach(sec => {
+        const items = sec.ids.filter(id => mesures[id] !== undefined);
+        if (items.length === 0) return;
+        const champ = CHAMPS.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+        rightHTML += `<div class="sc-section">${sec.titre}</div><div class="sc-grid">`;
+        items.forEach(id => {
+          const c = champ[id];
+          rightHTML += `
+            <div class="sc-item" style="border-left-color:${couleurs[id]}">
+              <div class="sc-item-label">${c.label}</div>
+              <div class="sc-item-value">${mesures[id]}<span> ${c.unit}</span></div>
+            </div>`;
+        });
+        rightHTML += `</div>`;
+      });
+
+      // Serialize SVG with hardcoded colors (no CSS vars)
+      const svgContent = `<svg viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg" width="240" height="315">
+        <ellipse cx="160" cy="42" rx="26" ry="30" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <rect x="149" y="68" width="22" height="16" rx="4" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M115,84 Q98,90 95,120 Q93,148 100,175 L220,175 Q227,148 225,120 Q222,90 205,84 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <ellipse cx="97" cy="96" rx="18" ry="12" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <ellipse cx="223" cy="96" rx="18" ry="12" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M82,104 Q70,118 68,140 Q66,158 70,175 L86,175 Q85,155 87,138 Q90,118 100,104 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M70,175 Q66,195 67,215 Q68,228 72,235 L88,235 Q87,228 86,215 Q85,195 86,175 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M238,104 Q250,118 252,140 Q254,158 250,175 L234,175 Q235,155 233,138 Q230,118 220,104 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M250,175 Q254,195 253,215 Q252,228 248,235 L232,235 Q233,228 234,215 Q235,195 234,175 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M100,175 Q92,195 95,215 L225,215 Q228,195 220,175 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M95,215 Q88,240 90,268 Q92,285 96,295 L126,295 Q126,285 128,268 Q130,240 130,215 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M225,215 Q232,240 230,268 Q228,285 224,295 L194,295 Q194,285 192,268 Q190,240 190,215 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M96,295 Q93,315 94,338 Q95,352 98,360 L124,360 Q124,352 126,338 Q127,315 126,295 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <path d="M224,295 Q227,315 226,338 Q225,352 222,360 L196,360 Q196,352 194,338 Q193,315 194,295 Z" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <ellipse cx="111" cy="366" rx="16" ry="8" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <ellipse cx="209" cy="366" rx="16" ry="8" fill="#e8e6e0" stroke="#888" stroke-width="1.5"/>
+        <line x1="82" y1="90" x2="52" y2="90" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="49" y="94" font-size="11" fill="#7F77DD" text-anchor="end" font-family="sans-serif">épaules</text>
+        <line x1="95" y1="112" x2="52" y2="112" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="49" y="116" font-size="11" fill="#1D9E75" text-anchor="end" font-family="sans-serif">poitrine</text>
+        <line x1="95" y1="155" x2="52" y2="155" stroke="#D85A30" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="49" y="159" font-size="11" fill="#D85A30" text-anchor="end" font-family="sans-serif">taille</text>
+        <line x1="96" y1="197" x2="52" y2="197" stroke="#D4537E" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="49" y="201" font-size="11" fill="#D4537E" text-anchor="end" font-family="sans-serif">hanches</text>
+        <line x1="240" y1="140" x2="268" y2="140" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="271" y="144" font-size="11" fill="#BA7517" text-anchor="start" font-family="sans-serif">biceps</text>
+        <line x1="225" y1="252" x2="268" y2="252" stroke="#378ADD" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="271" y="256" font-size="11" fill="#378ADD" text-anchor="start" font-family="sans-serif">cuisse</text>
+        <line x1="222" y1="328" x2="268" y2="328" stroke="#888780" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="271" y="332" font-size="11" fill="#888780" text-anchor="start" font-family="sans-serif">mollet</text>
+      </svg>`;
+
+      const svgBlob = new Blob([svgContent], {type: 'image/svg+xml'});
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const card = document.getElementById('share-card');
+      card.innerHTML = `
+        <div class="sc-header">
+          <div class="sc-title">Mes mensurations</div>
+          <div class="sc-date">${date}</div>
+        </div>
+        <div class="sc-body">
+          <div class="sc-left">
+            <img id="sc-svg-img" src="${svgUrl}" width="240" />
+          </div>
+          <div class="sc-right">${rightHTML}</div>
+        </div>
+        <div class="sc-footer">mesures-corps · généré le ${date}</div>
+      `;
+
+      showToast('Génération de l\'image...');
+
+      const img = card.querySelector('#sc-svg-img');
+      const doCapture = () => {
+        html2canvas(card, { scale: 2, backgroundColor: '#ffffff', useCORS: true, allowTaint: true }).then(canvas => {
+          URL.revokeObjectURL(svgUrl);
+          const a = document.createElement('a');
+          a.download = 'mes-mesures-' + new Date().toISOString().slice(0,10) + '.png';
+          a.href = canvas.toDataURL('image/png');
+          a.click();
+          showToast('Image téléchargée !');
+        });
+      };
+
+      if (img.complete) { setTimeout(doCapture, 100); }
+      else { img.onload = () => setTimeout(doCapture, 100); }
+    }
+  </script>
+
+  <!-- Carte hors-écran pour le screenshot -->
+  <div id="share-card"></div>
+</html>
